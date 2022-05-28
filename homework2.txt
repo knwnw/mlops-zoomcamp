@@ -1,0 +1,17 @@
+Q1: What's the version (of MLflow) that you have?
+    mlflow, version 1.26.1
+
+Q2: How many files were saved to OUTPUT_FOLDER?
+    4
+
+Q3: How many parameters are automatically logged by MLflow?
+    17
+
+Q4: In addition to backend-store-uri, what else do you need to pass to properly configure the server?
+    default-artifact-root
+
+Q5: What's the best validation RMSE that you got (using hyperopt)?
+    ...
+
+Q6: What is the test RMSE of the best model?
+    ...
