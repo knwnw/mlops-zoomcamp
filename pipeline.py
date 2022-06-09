@@ -53,10 +53,12 @@ def save_model(dv, model, path: str) -> None:
 
 
 df_train = read_dataframe(
-    args.train_data if args.train_data else DIR_DATA + "green_tripdata_2021-01.parquet"
+    args.train_data
+    if args.train_data else DIR_DATA + "green_tripdata_2021-01.parquet"
 )
 df_val = read_dataframe(
-    args.val_data if args.val_data else DIR_DATA + "green_tripdata_2021-02.parquet"
+    args.val_data
+    if args.val_data else DIR_DATA + "green_tripdata_2021-02.parquet"
 )
 
 df_train["PU_DO"] = df_train["PULocationID"] + "_" + df_train["DOLocationID"]

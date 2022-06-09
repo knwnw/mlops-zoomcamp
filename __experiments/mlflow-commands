@@ -1,0 +1,8 @@
+.set_tracking_uri(uri)
+.set_experiment(exp_name)
+.start_run()
+.set_tag(tag_name, value)
+.log_param(param_name, value)
+.log_metric(metric_name, value)
+.autolog()
+.xgboost.autolog()
