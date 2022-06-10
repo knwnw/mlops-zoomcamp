@@ -1,5 +1,6 @@
 import mlflow
 import pandas as pd
+import pickle
 import xgboost as xgb
 
 from hyperopt import STATUS_OK
@@ -12,7 +13,7 @@ ROOT_DIR = "/home/ibra/python-projects/mlops-zoomcamp"
 mlflow.set_tracking_uri(f"sqlite:///{ROOT_DIR}/__experiments/mlflow.db")
 mlflow.set_experiment("nyc-taxi-experiment")
 
-mlflow.xgboost.autolog()
+mlflow.xgboost.autolog(disable=True)
 
 
 def read_dataframe(filename: str) -> pd.DataFrame:
@@ -64,27 +65,46 @@ target = "duration"
 y_train = df_train[target].values
 y_val = df_val[target].values
 
-train = xgb.DMatrix(X_train, label=y_train)
-val = xgb.DMatrix(X_val, label=y_val)
+with mlflow.start_run():
+    train = xgb.DMatrix(X_train, label=y_train)
+    val = xgb.DMatrix(X_val, label=y_val)
 
-params = {
-    "learning_rate": 0.2047217,
-    "max_depth": 17,
-    "min_child_weight": 1.2402612,
-    "objective": "reg:squarederror",
-    "reg_alpha": 0.2856789,
-    "reg_lambda": 0.0042644,
-    "seed": 42,
-}
+    almost_best_params = {
+        "learning_rate": 0.2047217,
+        "max_depth": 17,
+        "min_child_weight": 1.2402612,
+        "objective": "reg:squarederror",
+        "reg_alpha": 0.2856789,
+        "reg_lambda": 0.0042644,
+        "seed": 42,
+    }
 
-booster = xgb.train(
-    params=params,
-    dtrain=train,
-    num_boost_round=1000,
-    evals=[(val, "validation")],
-    early_stopping_rounds=50
-)
+    mlflow.log_params(almost_best_params)
 
+    booster = xgb.train(
+        params=almost_best_params,
+        dtrain=train,
+        num_boost_round=1000,
+        evals=[(val, "validation")],
+        early_stopping_rounds=50
+    )
+
+    y_pred = booster.predict(val)
+    rmse = mean_squared_error(y_val, y_pred, squared=False)
+    mlflow.log_metric("rmse", rmse)
+
+    with open(f"{ROOT_DIR}/__experiments/models/preprocessor.b", "wb") as f:
+        pickle.dump(dv, f)
+
+    mlflow.log_artifact(
+        local_path=f"{ROOT_DIR}/__experiments/models/preprocessor.b",
+        artifact_path="preprocessor"
+    )
+
+    mlflow.xgboost.log_model(
+        xgb_model=booster,
+        artifact_path="models_mlflow"
+    )
 
 # NOTE
 # The code below was used to obtain the params for (almost) best RMSE.

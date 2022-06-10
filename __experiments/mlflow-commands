@@ -1,8 +1,24 @@
-.set_tracking_uri(uri)
-.set_experiment(exp_name)
-.start_run()
-.set_tag(tag_name, value)
-.log_param(param_name, value)
-.log_metric(metric_name, value)
-.autolog()
-.xgboost.autolog()
+Bash:
+  mlflow ui --backend-store-uri PATH
+
+Python:
+  .autolog()
+  .log_artifact(local_path, artifact_path)
+  .log_metric(key, value)
+  .log_param(key, value)
+  .set_experiment(name=None, id=None)
+  .set_tag(key, value)
+  .set_tracking_uri(uri)
+  .start_run()
+  .xgboost.autolog()
+  .xgboost.log_model(xgb_model, artifact_path)
+
+Keep in mind:
+  1. When you use mlflow.xgboost.autolog() and mlflow.log_params() in the same code, 
+  you get less parameters logged to mlflow. In my experiment I've got 12 parameters when I used autolog only,
+  and 7 parameters when I used both autolog and log_params. Those 7 parameters were exactly the ones
+  I passed to log_params method. In both cases I've got 3 metrics logged.
+  2. If you use only log_params then you log only those parameters that were passed to the log_params
+  and no metrics logged.
+  3. When you run code without both, you get no metrics and no parameters logged.
+  4. autolog creates separate folder for model, so if you use both, you get two folders.
