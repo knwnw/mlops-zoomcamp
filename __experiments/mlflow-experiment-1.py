@@ -1,5 +1,6 @@
 import mlflow
 import pandas as pd
+import pickle
 from sklearn.feature_extraction import DictVectorizer
 from sklearn.linear_model import Lasso
 from sklearn.metrics import mean_squared_error
@@ -45,7 +46,7 @@ with mlflow.start_run():
     mlflow.log_param("train-data-path", "/data/green_tripdata_2021-01.parquet")
     mlflow.log_param("val-data-path", "/data/green_tripdata_2021-02.parquet")
 
-    alpha = 0.00001
+    alpha = 0.01
     mlflow.log_param("alpha", alpha)
 
     lr = Lasso(alpha)
@@ -53,3 +54,11 @@ with mlflow.start_run():
     y_pred = lr.predict(X_val)
     rmse = mean_squared_error(y_val, y_pred, squared=False)
     mlflow.log_metric("rmse", rmse)
+
+    with open(f"{ROOT_DIR}/__experiments/models/lin_reg.bin", "wb") as f:
+        pickle.dump((dv, lr), f)
+
+    mlflow.log_artifact(
+        local_path=f"{ROOT_DIR}/__experiments/models/lin_reg.bin",
+        artifact_path="models_pickle"
+    )
